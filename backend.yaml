@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  backend:
+    build: backend
+    restart: on-failure:10
+    ports:
+      - 8080:8080
+    environment:
+      - POSTGRES_DB=pollydb
+    networks:
+      - backend-postgres
+networks:
+  backend-postgres:

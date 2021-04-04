@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  db:
+    image: postgres
+    restart: always
+    container_name: polly-postgres-db
+    secrets:
+      - db-password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend-postgres
+    environment:
+      - POSTGRES_DB=pollydb
+      - POSTGRES_USER=polly
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+  backend:
+    build: backend
+    depends_on:
+      - db
+    restart: on-failure:10
+    ports:
+      - 8080:8080
+    environment:
+      - POSTGRES_DB=pollydb
+    networks:
+      - backend-postgres
+volumes:
+  db-data:
+secrets:
+  db-password:
+    file: db/password.txt
+networks:
+  backend-postgres:
