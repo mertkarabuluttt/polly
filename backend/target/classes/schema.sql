@@ -1,12 +1,12 @@
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
-	userId serial PRIMARY KEY,
-	firstName varchar(100) NOT NULL,
-	lastName varchar(100) NOT NULL,
+	id serial PRIMARY KEY,
+	first_name varchar(100) NOT NULL,
+	last_name varchar(100) NOT NULL,
 	email varchar(100) NOT NULL
 );
 
-CREATE TABLE greetings
+CREATE TABLE IF NOT EXISTS greeting
 (
     greetingId serial PRIMARY KEY,
     content varchar(500) NOT NULL

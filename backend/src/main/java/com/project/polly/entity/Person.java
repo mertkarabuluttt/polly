@@ -1,9 +1,10 @@
 package com.project.polly.entity;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
-public class Users {
+public class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,9 +13,9 @@ public class Users {
     private String lastName;
     private String email;
 
-    public Users() {}
+    public Person() {}
 
-    public Users(String firstName, String lastName, String email) {
+    public Person(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -54,11 +55,24 @@ public class Users {
 
     @Override
     public String toString() {
-        return "User{" +
-                "userId=" + id +
+        return "Person{" +
+                "personId=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return Objects.equals(id, person.id) && Objects.equals(firstName, person.firstName) && Objects.equals(lastName, person.lastName) && Objects.equals(email, person.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, email);
     }
 }
