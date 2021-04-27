@@ -1,11 +1,11 @@
 package com.project.polly.controller;
 
 import com.project.polly.entity.Person;
+import com.project.polly.exceptions.PersonNotFoundException;
 import com.project.polly.repository.PersonRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class PersonController {
@@ -28,8 +28,9 @@ public class PersonController {
     }
 
     @GetMapping("/person/{id}")
-    Optional<Person> getById(@PathVariable Integer id) {
-        return repository.findById(id);
+    Person getById(@PathVariable Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new PersonNotFoundException(id));
     }
 
     @PutMapping("/person/{id}")
