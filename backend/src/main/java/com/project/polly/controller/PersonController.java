@@ -6,6 +6,8 @@ import com.project.polly.exceptions.PersonNotFoundException;
 import com.project.polly.repository.PersonRepository;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,8 +39,12 @@ public class PersonController {
     }
 
     @PostMapping(path = "/person")
-    Person newPerson(@RequestBody Person newPerson) {
-        return repository.save(newPerson);
+    ResponseEntity<?> newPerson(@RequestBody Person newPerson) {
+        EntityModel<Person> entityModel = assembler.toModel(repository.save(newPerson));
+
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel);
     }
 
     @GetMapping("/person/{id}")
@@ -49,23 +55,31 @@ public class PersonController {
         return assembler.toModel(person);
     }
 
-    @PutMapping("/person/{id}")
-    Person replacePerson(@RequestBody Person newPerson, @PathVariable Integer id) {
-        return repository.findById(id)
+    @PutMapping(path = "/person/{id}")
+    public ResponseEntity<?> replacePerson(@RequestBody Person newPerson, @PathVariable Integer id) {
+        Person updatedPerson = repository.findById(id)
                 .map(person -> {
                     person.setFirstName(newPerson.getFirstName());
                     person.setLastName(newPerson.getLastName());
                     person.setEmail(newPerson.getEmail());
                     return repository.save(person);
-                }).orElseGet(() -> {
+                })
+                .orElseGet(() -> {
                     newPerson.setId(id);
                     return repository.save(newPerson);
                 });
+
+        EntityModel<Person> entityModel = assembler.toModel(updatedPerson);
+        return ResponseEntity
+                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel);
     }
 
-    @DeleteMapping("/person/{id}")
-    void deletePerson(@PathVariable Integer id) {
+    @DeleteMapping(path = "/person/{id}")
+    ResponseEntity<?> deletePerson(@PathVariable Integer id) {
         repository.deleteById(id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(path = "/person/firstname")
