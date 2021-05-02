@@ -1,5 +1,6 @@
 package com.project.polly.controller;
 
+import com.project.polly.assembler.PersonModelAssembler;
 import com.project.polly.entity.Person;
 import com.project.polly.exceptions.PersonNotFoundException;
 import com.project.polly.repository.PersonRepository;
@@ -18,23 +19,18 @@ public class PersonController {
 
 
     private final PersonRepository repository;
+    private final PersonModelAssembler assembler;
 
-    PersonController (PersonRepository repository) {
+    PersonController (PersonRepository repository, PersonModelAssembler assembler) {
         this.repository = repository;
+        this.assembler = assembler;
     }
 
-    //@GetMapping("/person")
-    //Iterable<Person> all() {
-    //    return repository.findAll();
-    //}
-
     @GetMapping("/person")
-    CollectionModel<EntityModel<Person>> all() {
+    public CollectionModel<EntityModel<Person>> all() {
 
         List<EntityModel<Person>> people = repository.findAll().stream()
-                .map(person -> EntityModel.of(person,
-                        linkTo(methodOn(PersonController.class).getById(person.getId())).withSelfRel(),
-                        linkTo(methodOn(PersonController.class).all()).withRel("employees")))
+                .map(assembler::toModel)
                 .collect(Collectors.toList());
 
         return CollectionModel.of(people, linkTo(methodOn(PersonController.class).all()).withSelfRel());
@@ -46,13 +42,11 @@ public class PersonController {
     }
 
     @GetMapping("/person/{id}")
-    EntityModel<Person> getById(@PathVariable Integer id) {
+    public EntityModel<Person> getById(@PathVariable Integer id) {
         Person person = repository.findById(id)
                 .orElseThrow(() -> new PersonNotFoundException(id));
 
-        return EntityModel.of(person, //
-                linkTo(methodOn(PersonController.class).getById(id)).withSelfRel(),
-                linkTo(methodOn(PersonController.class).all()).withRel("person"));
+        return assembler.toModel(person);
     }
 
     @PutMapping("/person/{id}")
